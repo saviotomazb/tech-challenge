@@ -26,21 +26,23 @@ public class Beneficiario
         DefinirDados(nomeCompleto, cpf, dataNascimento, planoId);
     }
 
-    public Guid Id { get; set; }
+    public Guid Id { get; private set; }
 
-    public string NomeCompleto { get; set; } = null!;
+    public string NomeCompleto { get; private set; } = null!;
 
-    public string Cpf { get; set; } = null!;
+    public string Cpf { get; private set; } = null!;
 
-    public DateOnly DataNascimento { get; set; }
+    public DateOnly DataNascimento { get; private set; }
 
-    public StatusBeneficiario Status { get; set; }
+    public StatusBeneficiario Status { get; private set; }
 
-    public Guid PlanoId { get; set; }
+    public Guid PlanoId { get; private set; }
 
-    public Plano? Plano { get; set; }
+    public Plano? Plano { get; private set; }
 
-    public DateTime DataCadastro { get; set; }
+    public DateTime DataCadastro { get; private set; }
+
+    public DateTime? ExcluidoEm { get; private set; }
 
     public void DefinirDados(
         string? nomeCompleto,
@@ -133,5 +135,10 @@ public class Beneficiario
         var resto = soma % 11;
 
         return resto < 2 ? 0 : 11 - resto;
+    }
+
+    public void Excluir()
+    {
+        ExcluidoEm = DateTime.UtcNow;
     }
 }
