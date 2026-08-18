@@ -80,7 +80,7 @@ public class BeneficiarioServico(AppDbContext db)
 
     public async Task<Beneficiario> AtualizarAsync(
         Guid id,
-        BeneficiarioRequestAtualizacao dados,
+        BeneficiarioAtualizacaoDados dados,
         CancellationToken cancellationToken)
     {
         var beneficiario = await ObterAsync(id, cancellationToken);
@@ -163,4 +163,4 @@ public class BeneficiarioServico(AppDbContext db)
 
 public sealed record BeneficiarioRequestDados(string? NomeCompleto, string? Cpf, DateOnly DataNascimento, Guid PlanoId); 
 
-public sealed record BeneficiarioRequestAtualizacao(string? NomeCompleto, DateOnly DataNascimento, Guid PlanoId, StatusBeneficiario Status);
+public sealed record BeneficiarioAtualizacaoDados(string? NomeCompleto, DateOnly DataNascimento, Guid PlanoId, StatusBeneficiario Status);

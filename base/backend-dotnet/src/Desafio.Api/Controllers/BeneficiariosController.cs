@@ -1,59 +1,96 @@
+using Desafio.Api.Api.Contratos;
+using Desafio.Api.Aplicacao;
 using Desafio.Api.Dominio;
-using Desafio.Api.Infraestrutura;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Desafio.Api.Controllers;
 
 [ApiController]
 [Route("beneficiarios")]
 [Produces("application/json")]
-public class BeneficiariosController : ControllerBase
+public class BeneficiariosController(BeneficiarioServico servico) : ControllerBase
 {
-    private readonly AppDbContext _db;
-
-    public BeneficiariosController(AppDbContext db)
+    [HttpPost]
+    [ProducesResponseType<BeneficiarioResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Criar(
+        [FromBody] BeneficiarioRequest requisicao,
+        CancellationToken cancellationToken)
     {
-        _db = db;
+        var dados = new BeneficiarioRequestDados(requisicao.NomeCompleto, requisicao.Cpf, requisicao.DataNascimento, requisicao.PlanoId);
+
+        var beneficiario = await servico.CriarAsync(dados, cancellationToken);
+
+        return CreatedAtAction(nameof(Obter), new { id = beneficiario.Id }, BeneficiarioResponse.De(beneficiario));
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] Beneficiario beneficiario)
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType<BeneficiarioResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Obter(
+        Guid id,
+        CancellationToken cancellationToken)
     {
-        if (beneficiario.Cpf.Length == 11)
-        {
-            // Mesmo modelo do PlanoServico: a garantia de unicidade é o índice único da
-            // tabela, e esta consulta prévia existe só para recusar o pedido antes de ele
-            // chegar no banco.
-            var existe = _db.Beneficiarios.Any(b => b.Cpf == beneficiario.Cpf);
+        var beneficiario = await servico.ObterAsync(id, cancellationToken);
 
-            if (!existe)
-            {
-                _db.Beneficiarios.Add(beneficiario);
-                await _db.SaveChangesAsync();
+        return Ok(BeneficiarioResponse.De(beneficiario));
+    }
 
-                return Ok(beneficiario);
-            }
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType<BeneficiarioResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Atualizar(
+        Guid id,
+        [FromBody] BeneficiarioRequestAtualizacao requisicao,
+        CancellationToken cancellationToken)
+    {
+        var dados = new BeneficiarioAtualizacaoDados(
+            requisicao.NomeCompleto,
+            requisicao.DataNascimento,
+            requisicao.PlanoId,
+            requisicao.Status);
 
-            return BadRequest("CPF ja cadastrado");
-        }
+        var beneficiario = await servico.AtualizarAsync(
+            id,
+            dados,
+            cancellationToken);
 
-        return BadRequest("CPF invalido");
+        return Ok(BeneficiarioResponse.De(beneficiario));
+    }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ErroResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Excluir(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await servico.ExcluirAsync(id, cancellationToken);
+
+        return NoContent();
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Listar(
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanho = 20,
+        [FromQuery] StatusBeneficiario? status = null,
+        [FromQuery(Name = "plano_id")] Guid? planoId = null,
+        CancellationToken cancellationToken = default)
     {
-        var lista = await _db.Beneficiarios.ToListAsync();
+        var (dados, total) = await servico.ListarAsync(pagina, tamanho, status, planoId, cancellationToken);
 
-        // O plano é resolvido aqui, e não na consulta principal, porque o FindAsync usa o
-        // cache do contexto: a listagem continua fazendo uma única ida ao banco, qualquer
-        // que seja o tamanho da página.
-        foreach (var b in lista)
+        return Ok(new
         {
-            b.Plano = await _db.Planos.FindAsync(b.PlanoId);
-        }
-
-        return Ok(lista);
+            dados = dados.Select(BeneficiarioResponse.De).ToList(),
+            pagina,
+            tamanho,
+            total
+        });
     }
 }
