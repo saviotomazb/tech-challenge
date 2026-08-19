@@ -1,9 +1,12 @@
 <section class="cartao">
   <header class="cabecalho">
-    <h2>Cadastrar beneficiário</h2>
+    <h2>
+      {{ beneficiarioEmEdicao ? 'Editar beneficiário' : 'Cadastrar beneficiário' }}
+    </h2>
   </header>
 
-  <form (ngSubmit)="criar()">
+  <form (ngSubmit)="beneficiarioEmEdicao ? atualizar() : criar()">
+
     <div>
       <label for="nomeCompleto">Nome completo</label>
       <input
@@ -21,6 +24,7 @@
         name="cpf"
         type="text"
         [(ngModel)]="cpf"
+        [readonly]="!!beneficiarioEmEdicao"
         required />
     </div>
 
@@ -41,6 +45,7 @@
         name="planoId"
         [(ngModel)]="planoId"
         required>
+
         <option value="">Selecione um plano</option>
 
         @for (plano of planos(); track plano.id) {
@@ -51,6 +56,22 @@
       </select>
     </div>
 
+    @if (beneficiarioEmEdicao) {
+      <div>
+        <label for="status">Status</label>
+
+        <select
+          id="status"
+          name="status"
+          [(ngModel)]="status"
+          required>
+
+          <option value="ATIVO">Ativo</option>
+          <option value="INATIVO">Inativo</option>
+        </select>
+      </div>
+    }
+
     @if (erroCadastro()) {
       <p class="aviso erro">{{ erroCadastro() }}</p>
     }
@@ -58,8 +79,23 @@
     <button
       type="submit"
       [disabled]="cadastrando()">
-      {{ cadastrando() ? 'Cadastrando...' : 'Cadastrar' }}
+
+      {{
+        cadastrando()
+          ? (beneficiarioEmEdicao ? 'Salvando...' : 'Cadastrando...')
+          : (beneficiarioEmEdicao ? 'Salvar alterações' : 'Cadastrar')
+      }}
     </button>
+
+    @if (beneficiarioEmEdicao) {
+      <button
+        type="button"
+        (click)="cancelarEdicao()"
+        [disabled]="cadastrando()">
+        Cancelar
+      </button>
+    }
+
   </form>
 </section>
 
@@ -82,6 +118,7 @@
   } @else if (beneficiarios().length === 0) {
     <p class="aviso">Nenhum beneficiário cadastrado.</p>
   } @else {
+
     <table>
       <thead>
         <tr>
@@ -91,6 +128,7 @@
           <th>Status</th>
           <th>Plano</th>
           <th>Data de cadastro</th>
+          <th>Ações</th>
         </tr>
       </thead>
 
@@ -103,6 +141,20 @@
             <td>{{ beneficiario.status }}</td>
             <td>{{ beneficiario.planoId }}</td>
             <td>{{ beneficiario.dataCadastro }}</td>
+
+            <td>
+              <button
+                type="button"
+                (click)="editar(beneficiario)">
+                Editar
+              </button>
+
+              <button
+                type="button"
+                (click)="excluir(beneficiario)">
+                Excluir
+              </button>
+            </td>
           </tr>
         }
       </tbody>

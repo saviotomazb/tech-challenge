@@ -11,6 +11,13 @@ export interface CriarBeneficiario {
   planoId: string;
 }
 
+export interface AtualizarBeneficiario {
+  nomeCompleto: string;
+  dataNascimento: string;
+  planoId: string;
+  status: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,6 +35,19 @@ export class BeneficiarioServico {
     return this.http.post<Beneficiario>(
       `${this.apiBase}/beneficiarios`,
       beneficiario
+    );
+  }
+
+  atualizar(id: string, beneficiario: AtualizarBeneficiario) {
+    return this.http.put<Beneficiario>(
+      `${this.apiBase}/beneficiarios/${id}`,
+      beneficiario
+    );
+  }
+
+  excluir(id: string) {
+    return this.http.delete<void>(
+      `${this.apiBase}/beneficiarios/${id}`
     );
   }
 }
