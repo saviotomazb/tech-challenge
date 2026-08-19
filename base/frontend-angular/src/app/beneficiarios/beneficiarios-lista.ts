@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
@@ -18,6 +18,7 @@ import { AtualizarBeneficiario, BeneficiarioServico } from './beneficiario-servi
 export class BeneficiariosLista {
   private readonly servico = inject(BeneficiarioServico);
   private readonly planoServico = inject(PlanoServico);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly beneficiarios = signal<Beneficiario[]>([]);
   protected readonly planos = signal<Plano[]>([]);
@@ -85,12 +86,12 @@ export class BeneficiariosLista {
 
     this.servico
       .criar({
-        nomeCompleto: this.nomeCompleto,
+        nome_completo: this.nomeCompleto,
         cpf: this.cpf,
-        dataNascimento: this.dataNascimento,
-        planoId: this.planoId
+        data_nascimento: this.dataNascimento,
+        plano_id: this.planoId
       })
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.limparFormulario();
@@ -141,7 +142,7 @@ export class BeneficiariosLista {
 
     this.servico
       .atualizar(this.beneficiarioEmEdicao.id, dados)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.limparFormulario();
@@ -184,7 +185,7 @@ export class BeneficiariosLista {
 
     this.servico
       .excluir(beneficiario.id)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.carregar();

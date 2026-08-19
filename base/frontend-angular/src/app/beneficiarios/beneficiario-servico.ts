@@ -3,12 +3,13 @@ import { inject, Injectable } from '@angular/core';
 
 import { API_BASE } from '../nucleo/api';
 import { Beneficiario } from './beneficiario';
+import { map } from 'rxjs';
 
 export interface CriarBeneficiario {
-  nomeCompleto: string;
+  nome_completo: string;
   cpf: string;
-  dataNascimento: string;
-  planoId: string;
+  data_nascimento: string;
+  plano_id: string;
 }
 
 export interface AtualizarBeneficiario {
@@ -26,9 +27,13 @@ export class BeneficiarioServico {
   private readonly apiBase = inject(API_BASE);
 
   listar() {
-    return this.http.get<Beneficiario[]>(
-      `${this.apiBase}/beneficiarios`
-    );
+    return this.http
+      .get<{ dados: Beneficiario[] }>(
+        `${this.apiBase}/beneficiarios`
+      )
+      .pipe(
+        map(resposta => resposta.dados)
+      );
   }
 
   criar(beneficiario: CriarBeneficiario) {
