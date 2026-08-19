@@ -1,6 +1,72 @@
 <section class="cartao">
   <header class="cabecalho">
+    <h2>Cadastrar beneficiário</h2>
+  </header>
+
+  <form (ngSubmit)="criar()">
+    <div>
+      <label for="nomeCompleto">Nome completo</label>
+      <input
+        id="nomeCompleto"
+        name="nomeCompleto"
+        type="text"
+        [(ngModel)]="nomeCompleto"
+        required />
+    </div>
+
+    <div>
+      <label for="cpf">CPF</label>
+      <input
+        id="cpf"
+        name="cpf"
+        type="text"
+        [(ngModel)]="cpf"
+        required />
+    </div>
+
+    <div>
+      <label for="dataNascimento">Data de nascimento</label>
+      <input
+        id="dataNascimento"
+        name="dataNascimento"
+        type="date"
+        [(ngModel)]="dataNascimento"
+        required />
+    </div>
+
+    <div>
+      <label for="planoId">Plano</label>
+      <select
+        id="planoId"
+        name="planoId"
+        [(ngModel)]="planoId"
+        required>
+        <option value="">Selecione um plano</option>
+
+        @for (plano of planos(); track plano.id) {
+          <option [value]="plano.id">
+            {{ plano.nome }}
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (erroCadastro()) {
+      <p class="aviso erro">{{ erroCadastro() }}</p>
+    }
+
+    <button
+      type="submit"
+      [disabled]="cadastrando()">
+      {{ cadastrando() ? 'Cadastrando...' : 'Cadastrar' }}
+    </button>
+  </form>
+</section>
+
+<section class="cartao">
+  <header class="cabecalho">
     <h2>Beneficiários</h2>
+
     <button
       type="button"
       (click)="carregar()"
