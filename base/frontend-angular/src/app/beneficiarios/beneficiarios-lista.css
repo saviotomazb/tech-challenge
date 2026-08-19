@@ -1,0 +1,17 @@
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cabecalho h2 {
+  margin: 0;
+}
+
+button {
+  padding: 0.5rem 1rem;
+}
+
+table {
+  width: 100%;
+}

@@ -1,0 +1,45 @@
+<section class="cartao">
+  <header class="cabecalho">
+    <h2>Beneficiários</h2>
+    <button
+      type="button"
+      (click)="carregar()"
+      [disabled]="carregando()">
+      Recarregar
+    </button>
+  </header>
+
+  @if (carregando()) {
+    <p class="aviso">Carregando beneficiários...</p>
+  } @else if (erro()) {
+    <p class="aviso erro">{{ erro() }}</p>
+  } @else if (beneficiarios().length === 0) {
+    <p class="aviso">Nenhum beneficiário cadastrado.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>Data de nascimento</th>
+          <th>Status</th>
+          <th>Plano</th>
+          <th>Data de cadastro</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (beneficiario of beneficiarios(); track beneficiario.id) {
+          <tr>
+            <td>{{ beneficiario.nomeCompleto }}</td>
+            <td>{{ beneficiario.cpf }}</td>
+            <td>{{ beneficiario.dataNascimento }}</td>
+            <td>{{ beneficiario.status }}</td>
+            <td>{{ beneficiario.planoId }}</td>
+            <td>{{ beneficiario.dataCadastro }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
