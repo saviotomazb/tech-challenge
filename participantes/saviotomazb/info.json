@@ -1,0 +1,12 @@
+{
+  "identificador": "saviotomazb",
+  "nome": "Sávio Tomaz",
+  "email": "saviotomaz_@hotmail.com",
+  "imagem_api": "saviotomazb/desafio-4tech-api:latest",
+  "imagem_web": "saviotomazb/desafio-4tech-web:latest",
+  "stack": [
+    "dotnet-10",
+    "postgres-17",
+    "angular-20"
+  ]
+}
