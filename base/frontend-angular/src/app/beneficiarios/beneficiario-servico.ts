@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 
 import { API_BASE } from '../nucleo/api';
 import { Beneficiario } from './beneficiario';
-import { map } from 'rxjs';
 
 export interface CriarBeneficiario {
   nome_completo: string;
@@ -13,10 +12,17 @@ export interface CriarBeneficiario {
 }
 
 export interface AtualizarBeneficiario {
-  nomeCompleto: string;
-  dataNascimento: string;
-  planoId: string;
+  nome_completo: string;
+  data_nascimento: string;
+  plano_id: string;
   status: string;
+}
+
+export interface ListaBeneficiarios {
+  dados: Beneficiario[];
+  pagina: number;
+  tamanho: number;
+  total: number;
 }
 
 @Injectable({
@@ -27,13 +33,9 @@ export class BeneficiarioServico {
   private readonly apiBase = inject(API_BASE);
 
   listar() {
-    return this.http
-      .get<{ dados: Beneficiario[] }>(
-        `${this.apiBase}/beneficiarios`
-      )
-      .pipe(
-        map(resposta => resposta.dados)
-      );
+    return this.http.get<ListaBeneficiarios>(
+      `${this.apiBase}/beneficiarios`
+    );
   }
 
   criar(beneficiario: CriarBeneficiario) {

@@ -1,9 +1,9 @@
 export interface Beneficiario {
   id: string;
-  nomeCompleto: string;
+  nome_completo: string;
   cpf: string;
-  dataNascimento: string;
+  data_nascimento: string;
   status: string;
-  planoId: string;
-  dataCadastro: string;
+  plano_id: string;
+  data_cadastro: string;
 }

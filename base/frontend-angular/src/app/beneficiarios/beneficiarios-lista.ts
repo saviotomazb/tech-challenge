@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 import { mensagemDeErro } from '../nucleo/api';
 import { Plano } from '../planos/plano';
@@ -11,7 +12,7 @@ import { AtualizarBeneficiario, BeneficiarioServico } from './beneficiario-servi
 
 @Component({
   selector: 'app-beneficiarios-lista',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './beneficiarios-lista.html',
   styleUrl: './beneficiarios-lista.css'
 })
@@ -30,10 +31,10 @@ export class BeneficiariosLista {
 
   protected beneficiarioEmEdicao: Beneficiario | null = null;
 
-  protected nomeCompleto = '';
+  protected nome_completo = '';
   protected cpf = '';
-  protected dataNascimento = '';
-  protected planoId = '';
+  protected data_nascimento = '';
+  protected plano_id = '';
   protected status = 'ATIVO';
 
   constructor() {
@@ -47,10 +48,10 @@ export class BeneficiariosLista {
 
     this.servico
       .listar()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (beneficiarios) => {
-          this.beneficiarios.set(beneficiarios);
+        next: (resposta) => {
+          this.beneficiarios.set(resposta.dados);
           this.carregando.set(false);
         },
         error: (resposta: HttpErrorResponse) => {
@@ -63,7 +64,7 @@ export class BeneficiariosLista {
   private carregarPlanos(): void {
     this.planoServico
       .listar()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (planos) => {
           this.planos.set(planos);
@@ -74,10 +75,14 @@ export class BeneficiariosLista {
       });
   }
 
+  protected nomePlano(plano_id: string): string {
+    return this.planos().find(plano => plano.id === plano_id)?.nome ?? 'Plano não encontrado';
+  }
+
   protected criar(): void {
     this.erroCadastro.set(null);
 
-    if (!this.nomeCompleto || !this.cpf || !this.dataNascimento || !this.planoId) {
+    if (!this.nome_completo || !this.cpf || !this.data_nascimento || !this.plano_id) {
       this.erroCadastro.set('Preencha todos os campos.');
       return;
     }
@@ -86,10 +91,10 @@ export class BeneficiariosLista {
 
     this.servico
       .criar({
-        nome_completo: this.nomeCompleto,
+        nome_completo: this.nome_completo,
         cpf: this.cpf,
-        data_nascimento: this.dataNascimento,
-        plano_id: this.planoId
+        data_nascimento: this.data_nascimento,
+        plano_id: this.plano_id
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -110,10 +115,10 @@ export class BeneficiariosLista {
   protected editar(beneficiario: Beneficiario): void {
     this.beneficiarioEmEdicao = beneficiario;
 
-    this.nomeCompleto = beneficiario.nomeCompleto;
+    this.nome_completo = beneficiario.nome_completo;
     this.cpf = beneficiario.cpf;
-    this.dataNascimento = beneficiario.dataNascimento;
-    this.planoId = beneficiario.planoId;
+    this.data_nascimento = beneficiario.data_nascimento;
+    this.plano_id = beneficiario.plano_id;
     this.status = beneficiario.status;
 
     this.erroCadastro.set(null);
@@ -126,7 +131,7 @@ export class BeneficiariosLista {
 
     this.erroCadastro.set(null);
 
-    if (!this.nomeCompleto || !this.dataNascimento || !this.planoId || !this.status) {
+    if (!this.nome_completo || !this.data_nascimento || !this.plano_id || !this.status) {
       this.erroCadastro.set('Preencha todos os campos.');
       return;
     }
@@ -134,9 +139,9 @@ export class BeneficiariosLista {
     this.cadastrando.set(true);
 
     const dados: AtualizarBeneficiario = {
-      nomeCompleto: this.nomeCompleto,
-      dataNascimento: this.dataNascimento,
-      planoId: this.planoId,
+      nome_completo: this.nome_completo,
+      data_nascimento: this.data_nascimento,
+      plano_id: this.plano_id,
       status: this.status
     };
 
@@ -165,10 +170,10 @@ export class BeneficiariosLista {
   private limparFormulario(): void {
     this.beneficiarioEmEdicao = null;
 
-    this.nomeCompleto = '';
+    this.nome_completo = '';
     this.cpf = '';
-    this.dataNascimento = '';
-    this.planoId = '';
+    this.data_nascimento = '';
+    this.plano_id = '';
     this.status = 'ATIVO';
 
     this.erroCadastro.set(null);
@@ -176,7 +181,7 @@ export class BeneficiariosLista {
 
   protected excluir(beneficiario: Beneficiario): void {
     const confirmar = confirm(
-      `Deseja realmente excluir o beneficiário "${beneficiario.nomeCompleto}"?`
+      `Deseja realmente excluir o beneficiário "${beneficiario.nome_completo}"?`
     );
 
     if (!confirmar) {
